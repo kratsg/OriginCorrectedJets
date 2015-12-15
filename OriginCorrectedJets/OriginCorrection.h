@@ -31,6 +31,11 @@ public:
   std::string m_inContainerName;
   std::string m_outContainerName;
 
+  /// Kt, CamKt, AntiKt
+  std::string m_jet_alg;
+  float m_pt_min;
+  float m_radius;
+
 private:
   /* all tools we use */
     // this is for clustering
@@ -39,10 +44,6 @@ private:
     std::unique_ptr<JetFinder> m_jetFinderTool;
     std::unique_ptr<JetRecTool> m_originCorrectionTool;
 
-    // tool for calculating effectiveR
-    std::unique_ptr<EffectiveRTool> m_effectiveRTool;
-    // tool for trimming reclustered jet
-    std::unique_ptr<ReclusteredJetTrimmingTool> m_reclusteredJetTrimmingTool;
     // modifier tools for the reclustered jets
     std::unique_ptr<JetChargeTool>              m_jetChargeTool;
     std::unique_ptr<JetPullTool>                m_jetPullTool;

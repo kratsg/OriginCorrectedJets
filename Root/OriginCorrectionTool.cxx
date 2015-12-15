@@ -1,4 +1,4 @@
-#include "xAODJetReclustering/OriginCorrectionTool.h"
+#include "OriginCorrectedJets/OriginCorrectionTool.h"
 
 #include "xAODJet/JetConstituentVector.h"
 #include "xAODJet/JetContainer.h"

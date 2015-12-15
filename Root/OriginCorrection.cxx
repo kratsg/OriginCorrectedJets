@@ -12,7 +12,7 @@
 
 // package include(s):
 #include "xAODAnaHelpers/HelperFunctions.h"
-#include "xAODAnaHelpers/OriginCorrection.h"
+#include "OriginCorrectedJets/OriginCorrection.h"
 #include <xAODAnaHelpers/tools/ReturnCheck.h>
 
 // ROOT include(s):
@@ -25,14 +25,10 @@ ClassImp(OriginCorrection)
 
 OriginCorrection :: OriginCorrection (std::string className) :
     Algorithm(className),
-    m_jetFilterTool               (CxxUtils::make_unique<JetFilterTool>("JetFilterTool_"+className)),
-    m_inputJetFilterTool          (CxxUtils::make_unique<JetRecTool>("JetRec_InputJetFilterTool_"+className)),
     m_pseudoJetGetterTool         (CxxUtils::make_unique<PseudoJetGetter>("PseudoJetGetterTool_"+className)),
     m_jetFromPseudoJetTool        (CxxUtils::make_unique<JetFromPseudojet>("JetFromPseudoJetTool_"+className)),
     m_jetFinderTool               (CxxUtils::make_unique<JetFinder>("JetFinderTool_"+className)),
-    m_reclusterJetTool            (CxxUtils::make_unique<JetRecTool>("JetRec_JetReclusterTool_"+className)),
-    m_effectiveRTool              (CxxUtils::make_unique<EffectiveRTool>("EffectiveRTool_"+className)),
-    m_reclusteredJetTrimmingTool  (CxxUtils::make_unique<ReclusteredJetTrimmingTool>("ReclusteredJetTrimmingTool_"+className)),
+    m_originCorrectionTool        (CxxUtils::make_unique<JetRecTool>("JetRec_OriginCorrectionTool_"+className)),
     m_jetChargeTool               (CxxUtils::make_unique<JetChargeTool>("JetChargeTool_"+className)),
     m_jetPullTool                 (CxxUtils::make_unique<JetPullTool>("JetPullTool_"+className)),
     m_energyCorrelatorTool        (CxxUtils::make_unique<EnergyCorrelatorTool>("EnergyCorrelatorTool_"+className)),
@@ -48,8 +44,11 @@ OriginCorrection :: OriginCorrection (std::string className) :
   // read debug flag from .config file
   m_debug                   = false;
 
-  // input container to be read from TEvent or TStore
   m_inContainerName         = "";
+  m_outContainerName         = "";
+  m_jet_alg = "AntiKt";
+  m_pt_min = 0.0;
+  m_radius = 1.0;
 }
 
 EL::StatusCode  OriginCorrection :: configure ()
@@ -64,6 +63,11 @@ EL::StatusCode  OriginCorrection :: configure ()
     m_debug                   = config->GetValue("Debug" , m_debug);
     // input container to be read from TEvent or TStore
     m_inContainerName         = config->GetValue("InputContainer",  m_inContainerName.c_str());
+    m_outContainerName        = config->GetValue("OutputContainer",  m_outContainerName.c_str());
+
+    m_jet_alg                 = config->GetValue("JetAlgorithm", m_jet_alg.c_str());
+    m_pt_min                  = config->GetValue("PtMin", m_pt_min);
+    m_radius                  = config->GetValue("JetRadius", m_radius);
 
     config->Print();
 
@@ -75,6 +79,8 @@ EL::StatusCode  OriginCorrection :: configure ()
     Error("configure()", "InputContainer is empty!");
     return EL::StatusCode::FAILURE;
   }
+
+  if(m_outContainerName.empty()) m_outContainerName = "OriginCorrected"+m_inContainerName;
 
   if ( !getConfig().empty() )
     Info("configure()", "OriginCorrection Interface succesfully configured! ");
@@ -119,9 +125,14 @@ EL::StatusCode OriginCorrection :: initialize ()
     return EL::StatusCode::FAILURE;
   }
 
+  auto prettyFuncName = "OriginCorrection::initialize()";
+
+  ToolHandleArray<IJetModifier> modArray;
+  ToolHandleArray<IPseudoJetGetter> getterArray;
+
   /* initialize jet reclustering */
   RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("InputContainer", m_inContainerName), "");
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("OutputContainer", m_inContainerName+"_Clustered"), "");
+  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("OutputContainer", m_inContainerName+"_PseudoJets"), "");
   RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("Label", "LCTopo"), "");
   RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("SkipNegativeEnergy", true), "");
   RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("GhostScale", 0.0), "");
@@ -130,24 +141,15 @@ EL::StatusCode OriginCorrection :: initialize ()
   //    - create a Jet builder
   RETURN_CHECK(prettyFuncName, m_jetFromPseudoJetTool->initialize(), "");
   //    - create a ClusterSequence Tool
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetAlgorithm", algToAlgName.at(m_rc_alg)), "");
+  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetAlgorithm", m_jet_alg), "");
   RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetRadius", m_radius), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("VariableRMinRadius", m_varR_minR), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("VariableRMassScale", m_varR_mass*1.e3), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("PtMin", m_ptMin_rc*1.e3), "");
+  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("PtMin", m_pt_min*1.e3), "");
   RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("GhostArea", 0.0), "");
   RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("RandomOption", 1), "");
   RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetBuilder", ToolHandle<IJetFromPseudojet>(m_jetFromPseudoJetTool.get())), "");
   RETURN_CHECK(prettyFuncName, m_jetFinderTool->initialize(), "");
   //    - create list of modifiers.
   modArray.clear();
-  //        we need to calculate effectiveR before trimming, if we are doing variableR
-  modArray.push_back( ToolHandle<IJetModifier>( m_effectiveRTool.get() ) );
-  if(m_ptFrac > 0){
-    //        then trim the reclustered jets
-    CHECK(prettyFuncName, m_reclusteredJetTrimmingTool->setProperty("PtFrac", m_ptFrac), "");
-    modArray.push_back( ToolHandle<IJetModifier>( m_reclusteredJetTrimmingTool.get() ) );
-  }
   //        and then apply all other modifiers based on the trimmed reclustered jets
   modArray.push_back( ToolHandle<IJetModifier>( m_jetChargeTool.get() ) );
   modArray.push_back( ToolHandle<IJetModifier>( m_jetPullTool.get() ) );
@@ -158,7 +160,7 @@ EL::StatusCode OriginCorrection :: initialize ()
   modArray.push_back( ToolHandle<IJetModifier>( m_centerOfMassShapesTool.get() ) );
   modArray.push_back( ToolHandle<IJetModifier>( m_jetWidthTool.get() ) );
   //    - create our master reclustering tool
-  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("OutputContainer", m_outputJetContainer), "");
+  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("OutputContainer", m_outContainerName), "");
   RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("PseudoJetGetters", getterArray), "");
   RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("JetFinder", ToolHandle<IJetFinder>(m_jetFinderTool.get())), "");
   RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("JetModifiers", modArray), "");
