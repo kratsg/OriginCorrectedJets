@@ -6,16 +6,16 @@
 # https://twiki.cern.ch/twiki/bin/viewauth/Atlas/RootCore#Package_Makefile
 
 
-PACKAGE          = xAODAnaHelpers
+PACKAGE          = OriginCorrectedJets
 PACKAGE_PRELOAD  =
 PACKAGE_CXXFLAGS = -Wno-unused-local-typedefs
 PACKAGE_OBJFLAGS =
 PACKAGE_LDFLAGS  =
 PACKAGE_BINFLAGS =
 PACKAGE_LIBFLAGS =
-PACKAGE_DEP = EventLoop xAODBase xAODRootAccess xAODEventInfo GoodRunsLists PileupReweighting PATInterfaces PathResolver xAODTau xAODJet xAODMuon xAODEgamma xAODTracking xAODTruth MuonMomentumCorrections MuonEfficiencyCorrections MuonSelectorTools JetCalibTools JetSelectorTools AthContainers ElectronPhotonFourMomentumCorrection ElectronEfficiencyCorrection ElectronPhotonSelectorTools IsolationSelection IsolationCorrections ElectronPhotonShowerShapeFudgeTool PhotonEfficiencyCorrection METUtilities METInterface TauAnalysisTools AsgTools xAODMissingET JetResolution AssociationUtils Asg_FastJet JetEDM JetUncertainties JetCPInterfaces xAODBTaggingEfficiency TrigConfxAOD TrigDecisionTool xAODCutFlow JetMomentTools TrigMuonMatching TrigEgammaMatchingTool xAODMetaDataCnv xAODTriggerCnv xAODMetaData
+PACKAGE_DEP = EventLoop xAODRootAccess xAODEventInfo xAODJet JetSubStructureUtils xAODBTagging xAODEgamma Asg_FastJet JetEDM JetRec JetInterface JetSubStructureMomentTools JetMomentTools CxxUtils xAODAnaHelpers
 PACKAGE_TRYDEP   =
-PACKAGE_SCRIPTS  =  scripts/*.py
+PACKAGE_SCRIPTS  =
 PACKAGE_PEDANTIC = 1
 PACKAGE_NOOPT    = 0
 PACKAGE_NOCC     = 0

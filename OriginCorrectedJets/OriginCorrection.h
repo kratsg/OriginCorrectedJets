@@ -4,15 +4,56 @@
 // algorithm wrapper
 #include "xAODAnaHelpers/Algorithm.h"
 
+#include <fastjet/JetDefinition.hh>
+#include <map>
+#include <memory>
+
+// all general tools used
+#include "JetRec/PseudoJetGetter.h"
+#include "JetRec/JetFromPseudojet.h"
+#include "JetRec/JetFinder.h"
+#include "JetRec/JetFilterTool.h"
+#include "JetRec/JetRecTool.h"
+// all jet modifier tools
+#include "JetSubStructureMomentTools/JetChargeTool.h"
+#include "JetSubStructureMomentTools/JetPullTool.h"
+#include "JetSubStructureMomentTools/EnergyCorrelatorTool.h"
+#include "JetSubStructureMomentTools/EnergyCorrelatorRatiosTool.h"
+#include "JetSubStructureMomentTools/KTSplittingScaleTool.h"
+#include "JetSubStructureMomentTools/DipolarityTool.h"
+#include "JetSubStructureMomentTools/CenterOfMassShapesTool.h"
+#include "JetMomentTools/JetWidthTool.h"
+
 class OriginCorrection : public xAH::Algorithm
 {
-  // put your configuration variables here as public variables.
-  // that way they can be set directly from CINT and python.
 public:
   // configuration variables
   std::string m_inContainerName;
   std::string m_outContainerName;
 
+private:
+  /* all tools we use */
+    // this is for clustering
+    std::unique_ptr<PseudoJetGetter> m_pseudoJetGetterTool;
+    std::unique_ptr<JetFromPseudojet> m_jetFromPseudoJetTool;
+    std::unique_ptr<JetFinder> m_jetFinderTool;
+    std::unique_ptr<JetRecTool> m_originCorrectionTool;
+
+    // tool for calculating effectiveR
+    std::unique_ptr<EffectiveRTool> m_effectiveRTool;
+    // tool for trimming reclustered jet
+    std::unique_ptr<ReclusteredJetTrimmingTool> m_reclusteredJetTrimmingTool;
+    // modifier tools for the reclustered jets
+    std::unique_ptr<JetChargeTool>              m_jetChargeTool;
+    std::unique_ptr<JetPullTool>                m_jetPullTool;
+    std::unique_ptr<EnergyCorrelatorTool>       m_energyCorrelatorTool;
+    std::unique_ptr<EnergyCorrelatorRatiosTool> m_energyCorrelatorRatiosTool;
+    std::unique_ptr<KTSplittingScaleTool>       m_ktSplittingScaleTool;
+    std::unique_ptr<DipolarityTool>             m_dipolarityTool;
+    std::unique_ptr<CenterOfMassShapesTool>     m_centerOfMassShapesTool;
+    std::unique_ptr<JetWidthTool>               m_jetWidthTool;
+
+public:
   // this is a standard constructor
   OriginCorrection (std::string className = "OriginCorrection");
 
