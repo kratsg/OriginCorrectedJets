@@ -9,6 +9,9 @@ Question: what are the performance differences between
 
 as compared to the truth jets? How does substructure change? How does the behavior of substructure top-tagging perform across the board?
 
+This is for `HFSF2015 <https://github.com/US-ATLAS-HFSF/HFSF2015>`_.
+
+
 Physicists
 ==========
 
