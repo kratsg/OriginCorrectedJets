@@ -54,11 +54,8 @@ We need datasets that have the pflow objects -- see `this bigpanda page (12/15/2
   group.perf-jets.mc15_13TeV.410000.PhPyEG_P2012_ttbar_hdamp172p5_nonAH.e3698_s2608_s2183_r6765_r6282_p2471.DAOD_JETM8.111215.v2_EXT0/
   group.perf-jets.mc15_13TeV.301332.Py8EG_A14NNPDF23LO_zprime2750_tt.e4061_s2608_s2183_r6869_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
   group.perf-jets.mc15_13TeV.301330.Py8EG_A14NNPDF23LO_zprime2250_tt.e4061_s2608_s2183_r6869_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
-  group.perf-jets.mc15_13TeV.410000.PhPyEG_P2012_ttbar_hdamp172p5_nonAH.e3698_s2608_s2183_r6765_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
   group.perf-jets.mc15_13TeV.361025.Py8EG_A14NNPDF23LO_jetjet_JZ5W.e3668_s2576_s2132_r6765_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
   group.perf-jets.mc15_13TeV.361024.Py8EG_A14NNPDF23LO_jetjet_JZ4W.e3668_s2576_s2132_r6765_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
-  group.perf-jets.mc15_13TeV.361104.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Wminusmunu.merge.AOD.e3601_s2576_s2132_r6725_r6282.pflow_EXT0/
-  group.perf-jets.mc15_13TeV.361103.PowhegPythia8EvtGen_AZNLOCTEQ6L1_Wminusenu.merge.AOD.e3601_s2576_s2132_r6765_r6282.pflow_EXT0/
 
 Physicists
 ==========
