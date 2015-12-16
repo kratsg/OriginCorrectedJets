@@ -3,41 +3,28 @@
 #include <EventLoop/StatusCode.h>
 #include <EventLoop/Worker.h>
 
-#include <fastjet/PseudoJet.hh>
-#include <fastjet/ClusterSequence.hh>
-#include "JetInterface/IJetModifier.h"
-
-// make unique pointers
-#include <CxxUtils/make_unique.h>
-
 // package include(s):
 #include "xAODAnaHelpers/HelperFunctions.h"
 #include "OriginCorrectedJets/OriginCorrection.h"
 #include <xAODAnaHelpers/tools/ReturnCheck.h>
 
+// EDM includes
+#include "xAODJet/JetContainer.h"
+#include "xAODJet/JetAuxContainer.h"
+#include "xAODCaloEvent/CaloClusterContainer.h"
+
 // ROOT include(s):
 #include "TEnv.h"
 #include "TSystem.h"
 
+// C++ includes
+#include <cmath>
 
 // this is needed to distribute the algorithm to the workers
 ClassImp(OriginCorrection)
 
 OriginCorrection :: OriginCorrection (std::string className) :
-    Algorithm(className),
-    m_pseudoJetGetterTool         (CxxUtils::make_unique<PseudoJetGetter>("PseudoJetGetterTool_"+className)),
-    m_jetFromPseudoJetTool        (CxxUtils::make_unique<JetFromPseudojet>("JetFromPseudoJetTool_"+className)),
-    m_jetFinderTool               (CxxUtils::make_unique<JetFinder>("JetFinderTool_"+className)),
-    m_originCorrectionTool        (CxxUtils::make_unique<JetRecTool>("JetRec_OriginCorrectionTool_"+className)),
-    m_jetChargeTool               (CxxUtils::make_unique<JetChargeTool>("JetChargeTool_"+className)),
-    m_jetPullTool                 (CxxUtils::make_unique<JetPullTool>("JetPullTool_"+className)),
-    m_energyCorrelatorTool        (CxxUtils::make_unique<EnergyCorrelatorTool>("EnergyCorrelatorTool_"+className)),
-    m_energyCorrelatorRatiosTool  (CxxUtils::make_unique<EnergyCorrelatorRatiosTool>("EnergyCorrelatorRatiosTool_"+className)),
-    m_ktSplittingScaleTool        (CxxUtils::make_unique<KTSplittingScaleTool>("KTSplittingScaleTool_"+className)),
-    m_dipolarityTool              (CxxUtils::make_unique<DipolarityTool>("DipolarityTool_"+className)),
-    m_centerOfMassShapesTool      (CxxUtils::make_unique<CenterOfMassShapesTool>("CenterOfMassShapesTool_"+className)),
-    m_jetWidthTool                (CxxUtils::make_unique<JetWidthTool>("JetWidthTool_"+className))
-
+    Algorithm(className)
 {
   Info("OriginCorrection()", "Calling constructor");
 
@@ -45,10 +32,8 @@ OriginCorrection :: OriginCorrection (std::string className) :
   m_debug                   = false;
 
   m_inContainerName         = "";
-  m_outContainerName         = "";
-  m_jet_alg = "AntiKt";
-  m_pt_min = 0.0;
-  m_radius = 1.0;
+  m_outContainerName        = "";
+  m_vertexContainerName     = "PrimaryVertices";
 }
 
 EL::StatusCode  OriginCorrection :: configure ()
@@ -64,10 +49,7 @@ EL::StatusCode  OriginCorrection :: configure ()
     // input container to be read from TEvent or TStore
     m_inContainerName         = config->GetValue("InputContainer",  m_inContainerName.c_str());
     m_outContainerName        = config->GetValue("OutputContainer",  m_outContainerName.c_str());
-
-    m_jet_alg                 = config->GetValue("JetAlgorithm", m_jet_alg.c_str());
-    m_pt_min                  = config->GetValue("PtMin", m_pt_min);
-    m_radius                  = config->GetValue("JetRadius", m_radius);
+    m_vertexContainerName     = config->GetValue("PrimaryVertices", m_vertexContainerName.c_str());
 
     config->Print();
 
@@ -125,48 +107,6 @@ EL::StatusCode OriginCorrection :: initialize ()
     return EL::StatusCode::FAILURE;
   }
 
-  auto prettyFuncName = "OriginCorrection::initialize()";
-
-  ToolHandleArray<IJetModifier> modArray;
-  ToolHandleArray<IPseudoJetGetter> getterArray;
-
-  /* initialize jet reclustering */
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("InputContainer", m_inContainerName), "");
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("OutputContainer", m_inContainerName+"_PseudoJets"), "");
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("Label", "LCTopo"), "");
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("SkipNegativeEnergy", true), "");
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->setProperty("GhostScale", 0.0), "");
-  RETURN_CHECK(prettyFuncName, m_pseudoJetGetterTool->initialize(), "");
-  getterArray.push_back( ToolHandle<IPseudoJetGetter>(m_pseudoJetGetterTool.get()) );
-  //    - create a Jet builder
-  RETURN_CHECK(prettyFuncName, m_jetFromPseudoJetTool->initialize(), "");
-  //    - create a ClusterSequence Tool
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetAlgorithm", m_jet_alg), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetRadius", m_radius), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("PtMin", m_pt_min*1.e3), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("GhostArea", 0.0), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("RandomOption", 1), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->setProperty("JetBuilder", ToolHandle<IJetFromPseudojet>(m_jetFromPseudoJetTool.get())), "");
-  RETURN_CHECK(prettyFuncName, m_jetFinderTool->initialize(), "");
-  //    - create list of modifiers.
-  modArray.clear();
-  //        and then apply all other modifiers based on the trimmed reclustered jets
-  modArray.push_back( ToolHandle<IJetModifier>( m_jetChargeTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_jetPullTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_energyCorrelatorTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_energyCorrelatorRatiosTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_ktSplittingScaleTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_dipolarityTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_centerOfMassShapesTool.get() ) );
-  modArray.push_back( ToolHandle<IJetModifier>( m_jetWidthTool.get() ) );
-  //    - create our master reclustering tool
-  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("OutputContainer", m_outContainerName), "");
-  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("PseudoJetGetters", getterArray), "");
-  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("JetFinder", ToolHandle<IJetFinder>(m_jetFinderTool.get())), "");
-  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->setProperty("JetModifiers", modArray), "");
-  RETURN_CHECK(prettyFuncName, m_originCorrectionTool->initialize(), "");
-
-
   return EL::StatusCode::SUCCESS;
 }
 
@@ -175,9 +115,63 @@ EL::StatusCode OriginCorrection :: execute ()
 {
   if ( m_debug ) { Info("execute()", "Applying Jet Origin Correction... "); }
 
-  // get the collection from TEvent or TStore
-  const xAOD::JetContainer* inJets(nullptr);
-  RETURN_CHECK("OriginCorrection::execute()", HelperFunctions::retrieve(inJets, m_inContainerName, m_event, m_store, m_verbose) ,"");
+  // get the calorimeter clusters
+  const xAOD::CaloClusterContainer* inClusters(nullptr);
+  RETURN_CHECK("OriginCorrection::execute()", HelperFunctions::retrieve(inClusters, m_inContainerName, m_event, m_store, m_verbose) ,"");
+
+  // get the primary vertex's z-coordinate
+  const xAOD::VertexContainer* vertices(nullptr);
+  RETURN_CHECK("OriginCorrection::execute()", HelperFunctions::retrieve(vertices, m_vertexContainerName, m_event, m_store, m_verbose), "");
+  const xAOD::Vertex* primaryVertex = vertices->at(HelperFunctions::getPrimaryVertexLocation(vertices));
+
+  xAOD::JetContainer* outJets(new xAOD::JetContainer);
+  xAOD::JetAuxContainer* outJetsAux(new xAOD::JetAuxContainer);
+  outJets->setStore(outJetsAux);
+
+  RETURN_CHECK("OriginCorrection::execute()", m_store->record(outJets, m_outContainerName), "Could not record output container to TStore.");
+  RETURN_CHECK("OriginCorrection::execute()", m_store->record(outJetsAux, m_outContainerName+"Aux."), "Could not record output aux container to TStore.");
+
+  static SG::AuxElement::Decorator<ElementLink<xAOD::CaloClusterContainer> > parentClusterLink("ParentClusterLink");
+  for(const auto& cluster: *inClusters){
+    // first, retrieve center mag: Cluster Centroid (\f$\sqrt(x^2+y^2+z^2)\f$)
+    //      if it is somehow missing, we will just error out because it should not be missing
+    double center_mag(-999.0);
+    if(!cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_MAG, center_mag)) return EL::StatusCode::FAILURE;
+    // create and output jets
+    xAOD::Jet* outJet(new xAOD::Jet);
+    outJets->push_back(outJet);
+    // build element links
+    ElementLink<xAOD::CaloClusterContainer> el_cluster( *inClusters, cluster->index() );
+    parentClusterLink(*outJet) = el_cluster;
+    // calculate the correction and set the jet's 4-vector
+    float radius = center_mag/std::cosh(cluster->eta());
+    float new_eta = std::asinh(std::sinh(cluster->eta())-primaryVertex->z()/radius);
+    float new_pt = cluster->pt() * std::cosh(cluster->eta())/std::cosh(new_eta);
+    float new_phi = cluster->phi();
+    float new_m = cluster->m();
+    if(m_debug){
+      std::cout << "Cluster Information" << std::endl;
+      printf("\tOld ---- Pt: %0.4f\tEta: %0.4f\tPhi: %0.4f\tM: %0.4f\r\n", cluster->pt(), cluster->eta(), cluster->phi(), cluster->m());
+      printf("\tNew ---- Pt: %0.4f\tEta: %0.4f\tPhi: %0.4f\tM: %0.4f\r\n", new_pt, new_eta, new_phi, new_m);
+    }
+    xAOD::JetFourMom_t newp4(new_pt, new_eta, new_phi, new_m);
+    outJet->setJetP4(newp4);
+  }
+
+  /* ***FROM PROOFANA***
+      TLorentzVector part = ((Particle* ) theJet->Obj(ConstType,iParticle))->p;
+
+      if (trackaxis==2){
+          float radius = ((Particle* ) theJet->Obj(ConstType,iParticle))->Float("centermag")/cosh(part.Eta());
+          float etaCorr2=part.Eta()-Float("vxp_z_at_0")/(radius*cosh(part.Eta()));
+          float etaCorr=TMath::ASinH(sinh(part.Eta())-Float("vxp_z_at_0")/radius);
+          part.SetPtEtaPhiM(part.Pt()*cosh(part.Eta())/cosh(etaCorr),etaCorr,part.Phi(),0.0);
+
+      }
+
+  something like this. the "centermag" moment is what you want.
+  */
+
 
   return EL::StatusCode::SUCCESS;
 }
@@ -192,13 +186,7 @@ EL::StatusCode OriginCorrection :: postExecute ()
 
 
 
-EL::StatusCode OriginCorrection :: finalize ()
-{
-  Info("finalize()", "Deleting tool instances...");
-  return EL::StatusCode::SUCCESS;
-}
-
-
+EL::StatusCode OriginCorrection :: finalize () { return EL::StatusCode::SUCCESS; }
 
 EL::StatusCode OriginCorrection :: histFinalize ()
 {
