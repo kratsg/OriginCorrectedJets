@@ -41,8 +41,8 @@ You can run the code on an example file::
   xAH_run.py --files /share/t3data3/kratsg/xAODs/HFSF/pflowTest.root \
              --config OriginCorrection/data/config.py direct
 
-Files
-=====
+Organizational Information
+==========================
 
 Test Files
 ----------
@@ -64,6 +64,21 @@ We need datasets that have the pflow objects -- see `this bigpanda page (12/15/2
   group.perf-jets.mc15_13TeV.301330.Py8EG_A14NNPDF23LO_zprime2250_tt.e4061_s2608_s2183_r6869_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
   group.perf-jets.mc15_13TeV.361025.Py8EG_A14NNPDF23LO_jetjet_JZ5W.e3668_s2576_s2132_r6765_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
   group.perf-jets.mc15_13TeV.361024.Py8EG_A14NNPDF23LO_jetjet_JZ4W.e3668_s2576_s2132_r6765_r6282_p2471.DAOD_JETM8.111215.v1_EXT0/
+
+Relevant Containers
+-------------------
+
+Calorimeter Topoclusters
+  ``CaloCalTopoClusters``
+
+Truth Jets
+  ``AntiKt10TruthTrimmedPtFrac5SmallR20Jets``
+
+Normal Jets
+  ``AntiKt10LCTopoTrimmedPtFrac5SmallR20Jets``
+
+PFlow Jets
+  ``AntiKt10EMCPFlowTrimmedPtFrac5SmallR20Jets``
 
 Physicists
 ==========
