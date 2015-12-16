@@ -33,6 +33,14 @@ To install, simply run::
 
 and we are good to go.
 
+Running
+-------
+
+You can run the code on an example file::
+
+  xAH_run.py --files /share/t3data3/kratsg/xAODs/HFSF/pflowTest.root \
+             --config OriginCorrection/data/config.py direct
+
 Files
 =====
 
