@@ -21,7 +21,7 @@ c.setalg("JetReclusteringAlgo", {"m_debug": False,
                                  "m_ptMin_input": 0.0,
                                  "m_rc_algName": "antikt_algorithm",
                                  "m_radius": 1.0,
-                                 "m_ptMin_rc": 0.0,
+                                 "m_ptMin_rc": 25.0,
                                  "m_ptFrac": 0.05,
                                  "m_subjet_radius": 0.2,
                                  "m_name": "OriginCorrectedJets"
