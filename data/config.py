@@ -15,7 +15,7 @@ c.setalg("OriginCorrection", {"m_inContainerName": caloClusters,
                               "m_outContainerName": originCorrectedClusters,
                               "m_debug": True})
 
-c.setalg("JetReclusteringAlgo", {"m_debug": false,
+c.setalg("JetReclusteringAlgo", {"m_debug": False,
                                  "m_inputJetContainer": originCorrectedClusters,
                                  "m_outputJetContainer": originCorrectedJets,
                                  "m_ptMin_input": 0.0,
@@ -27,9 +27,9 @@ c.setalg("JetReclusteringAlgo", {"m_debug": false,
                                  "m_name": "OriginCorrectedJets"
                                 })
 
-for container in [truthjets, normalJets, pflowJets, originCorrectedJets]:
+for container in [truthJets, normalJets, pflowJets, originCorrectedJets]:
   c.setalg("JetHistsAlgo", {"m_debug": False,
                             "m_inContainerName": container,
-                            "m_detailStr": "kinematic",
+                            "m_detailStr": "kinematic substructure 4LeadingJets",
                             "m_name": container
                           })
