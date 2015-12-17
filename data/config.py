@@ -33,3 +33,10 @@ for container in [truthJets, normalJets, pflowJets, originCorrectedJets]:
                             "m_detailStr": "kinematic substructure 4LeadingJets",
                             "m_name": container
                           })
+
+c.setalg("JetComparisonHistsAlgo", {"m_debug": False,
+                                    "m_inContainer1Name": normalJets,
+                                    "m_inContainer2Name": originCorrectedJets,
+                                    "m_detailStr": "kinematic substructure 4LeadingJets",
+                                    "m_name": "{0:s}versus{1:s}".format(normalJets, originCorrectedJets)
+                                   })
