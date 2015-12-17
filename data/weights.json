@@ -1,0 +1,58 @@
+{
+    "301330": {
+        "e2250": {
+            "cross section": 0.027464500000000003, 
+            "filter efficiency": 1.0, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
+    "301332": {
+        "e2750": {
+            "cross section": 0.008679425, 
+            "filter efficiency": 1.0, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
+    "361024": {
+        "e3668": {
+            "cross section": 254627.69153729366, 
+            "filter efficiency": 0.0005311552710065108, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
+    "361025": {
+        "e3668": {
+            "cross section": 4553.489122280779, 
+            "filter efficiency": 0.0009251015354338599, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
+    "361027": {
+        "e3668": {
+            "cross section": 16.214688204356488, 
+            "filter efficiency": 0.00039361889341347334, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
+    "361028": {
+        "e3569": {
+            "cross section": 0.6250240999999995, 
+            "filter efficiency": 0.010172920456000012, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
+    "410000": {
+        "e3698": {
+            "cross section": 696.1390191378407, 
+            "filter efficiency": 0.5440621128097156, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }
+}
