@@ -1,6 +1,8 @@
 from xAH_config import xAH_config
 c = xAH_config()
 
+import itertools
+
 ''' Define all containers we use '''
 caloClusters = "CaloCalTopoClusters"
 truthJets    = "AntiKt10TruthTrimmedPtFrac5SmallR20Jets"
@@ -43,24 +45,37 @@ c.setalg("JetReclusteringAlgo", {"m_debug": False,
                                  "m_name": "OriginCorrectedJets"
                                 })
 
-for container in [truthJets, normalJets, pflowJets, originCorrectedJets, uncorrectedClusters, originCorrectedClusters]:
+# define list of input jets and selected jets
+jets = [truthJets, normalJets, pflowJets, originCorrectedJets]
+selectedJets = ["{0:s}Selected".format(container) for container in jets]
+
+for inContainer,outContainer in zip(jets,selectedJets):
+  c.setalg("JetSelector", {"m_name": "Select{0:s}".format(inContainer),
+                           "m_inContainerName": inContainer,
+                           "m_outContainerName": outContainer,
+                           "m_decorateSelectedObjects": False,
+                           "m_createSelectedContainer": True,
+                           "m_cleanJets": False,
+                           "m_pT_min": 450.e3})
+
+for container in jets+selectedJets+[uncorrectedClusters, originCorrectedClusters]:
   c.setalg("JetHistsAlgo", {"m_debug": False,
                             "m_inContainerName": container,
                             "m_detailStr": "kinematic substructure 2LeadingJets",
                             "m_name": "kinematics/{0:s}".format(container)
                           })
 
-for left,right,compareClusters in [(originCorrectedClusters, "", True),
-                   (normalJets, originCorrectedJets, False),
-                   (normalJets, truthJets, False),
-                   (normalJets, pflowJets, False),
-                   (originCorrectedJets, truthJets, False),
-                   (pflowJets, truthJets, False),
-                   (pflowJets, originCorrectedJets, False)]:
+c.setalg("JetComparisonHistsAlgo", {"m_debug": False,
+                                    "m_inContainer1Name": originCorrectedClusters,
+                                    "m_inContainer2Name": uncorrectedClusters,
+                                    "m_detailStr": "kinematic",
+                                    "m_name": "comparisons/{0:s}v{1:s}".format(originCorrectedClusters, uncorrectedClusters),
+                                    "m_compareClusters": True})
+
+for left,right in list(itertools.combinations(jets,2))+list(itertools.combinations(selectedJets,2)):
   c.setalg("JetComparisonHistsAlgo", {"m_debug": False,
                                       "m_inContainer1Name": left,
                                       "m_inContainer2Name": right,
                                       "m_detailStr": "kinematic substructure 2LeadingJets",
-                                      "m_name": "comparisons/{0:s}v{1:s}".format(left, right),
-                                      "m_compareClusters": compareClusters
+                                      "m_name": "comparisons/{0:s}v{1:s}".format(left, right)
                                      })
