@@ -1,4 +1,5 @@
 #include <OriginCorrectedJets/OriginCorrection.h>
+#include <OriginCorrectedJets/JetComparisonHistsAlgo.h>
 
 #ifdef __CINT__
 
@@ -8,5 +9,6 @@
 #pragma link C++ nestedclass;
 
 #pragma link C++ class OriginCorrection+;
+#pragma link C++ class JetComparisonHistsAlgo+;
 
 #endif
