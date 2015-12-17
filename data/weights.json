@@ -31,6 +31,14 @@
             "num events": 1.0
         }
     }, 
+    "361026": {
+        "e3569": {
+            "cross section": 257.5340510766187, 
+            "filter efficiency": 0.0009410613000000014, 
+            "k-factor": 1.0, 
+            "num events": 1.0
+        }
+    }, 
     "361027": {
         "e3668": {
             "cross section": 16.214688204356488, 
