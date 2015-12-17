@@ -33,6 +33,7 @@ OriginCorrection :: OriginCorrection (std::string className) :
 
   m_inContainerName         = "";
   m_outContainerName        = "";
+  m_doCorrection            = true;
   m_vertexContainerName     = "PrimaryVertices";
 }
 
@@ -144,9 +145,13 @@ EL::StatusCode OriginCorrection :: execute ()
     ElementLink<xAOD::CaloClusterContainer> el_cluster( *inClusters, cluster->index() );
     parentClusterLink(*outJet) = el_cluster;
     // calculate the correction and set the jet's 4-vector
-    float radius = center_mag/std::cosh(cluster->eta());
-    float new_eta = std::asinh(std::sinh(cluster->eta())-primaryVertex->z()/radius);
-    float new_pt = cluster->pt() * std::cosh(cluster->eta())/std::cosh(new_eta);
+    float new_eta = cluster->eta();
+    float new_pt = cluster->pt();
+    if(m_doCorrection){
+      float radius = center_mag/std::cosh(cluster->eta());
+      new_eta = std::asinh(std::sinh(cluster->eta())-primaryVertex->z()/radius);
+      new_pt = cluster->pt() * std::cosh(cluster->eta())/std::cosh(new_eta);
+    }
     float new_phi = cluster->phi();
     float new_m = cluster->m();
     if(m_debug){

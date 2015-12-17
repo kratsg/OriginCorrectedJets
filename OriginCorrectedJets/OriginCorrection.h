@@ -10,6 +10,7 @@ public:
   // configuration variables
   std::string m_inContainerName;
   std::string m_outContainerName;
+  bool m_doCorrection;
   std::string m_vertexContainerName;
 
   // this is a standard constructor
