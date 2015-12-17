@@ -131,6 +131,12 @@ EL::StatusCode JetComparisonHistsAlgo :: execute ()
       const xAOD::CaloCluster* cluster = *(parentClusterLink(*jet1));
       xAOD::JetFourMom_t newp4(cluster->pt(), cluster->eta(), cluster->phi(), cluster->m());
       jet2->setJetP4(newp4);
+      if(m_debug){
+        std::cout << "Cluster Information" << std::endl;
+        printf("\tOld ---- Pt: %0.4f\tEta: %0.4f\tPhi: %0.4f\tM: %0.4f\r\n", jet2->pt(), jet2->eta(), jet2->phi(), jet2->m());
+        printf("\tNew ---- Pt: %0.4f\tEta: %0.4f\tPhi: %0.4f\tM: %0.4f\r\n", jet1->pt(), jet1->eta(), jet1->phi(), jet1->m());
+      }
+
       RETURN_CHECK("JetComparisonHistsAlgo::execute()", m_plots->execute( jet1, jet2, eventWeight ), "");
       delete jet2;
     }
