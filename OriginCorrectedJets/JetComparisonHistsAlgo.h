@@ -16,6 +16,7 @@ public:
   std::string m_inContainer2Name;
   std::string m_detailStr;
   float m_dR;
+  bool m_compareClusters;
 
 private:
   JetComparisonHists* m_plots; //!

@@ -6,6 +6,7 @@
 #include <xAODTracking/VertexContainer.h>
 #include <xAODEventInfo/EventInfo.h>
 #include <AthContainers/ConstDataVector.h>
+#include "xAODCaloEvent/CaloClusterContainer.h"
 
 #include <OriginCorrectedJets/JetComparisonHistsAlgo.h>
 #include <xAODAnaHelpers/HelperFunctions.h>
@@ -26,6 +27,7 @@ JetComparisonHistsAlgo :: JetComparisonHistsAlgo (std::string className) :
   // which plots will be turned on
   m_detailStr               = "";
   m_dR                      = 0.3;
+  m_compareClusters         = false;
 
   m_debug                   = false;
 
@@ -69,7 +71,7 @@ EL::StatusCode JetComparisonHistsAlgo :: configure ()
   }
 
   // in case anything was missing or blank...
-  if( m_inContainer1Name.empty() || m_inContainer2Name.empty() || m_detailStr.empty() ){
+  if( m_inContainer1Name.empty() || (m_inContainer2Name.empty() && !m_compareClusters) || m_detailStr.empty() ){
     Error("configure()", "One or more required configuration values are empty");
     return EL::StatusCode::FAILURE;
   }
@@ -117,8 +119,21 @@ EL::StatusCode JetComparisonHistsAlgo :: execute ()
   const xAOD::JetContainer* jets1(nullptr);
   const xAOD::JetContainer* jets2(nullptr);
   RETURN_CHECK("JetComparisonHistsAlgo::execute()", HelperFunctions::retrieve(jets1, m_inContainer1Name, m_event, m_store, m_verbose) ,("Failed to get "+m_inContainer1Name).c_str());
-  RETURN_CHECK("JetComparisonHistsAlgo::execute()", HelperFunctions::retrieve(jets2, m_inContainer2Name, m_event, m_store, m_verbose) ,("Failed to get "+m_inContainer2Name).c_str());
-  RETURN_CHECK("JetComparisonHistsAlgo::execute()", m_plots->execute( jets1, jets2, eventWeight ), "");
+  if(!m_compareClusters){
+    RETURN_CHECK("JetComparisonHistsAlgo::execute()", HelperFunctions::retrieve(jets2, m_inContainer2Name, m_event, m_store, m_verbose) ,("Failed to get "+m_inContainer2Name).c_str());
+    RETURN_CHECK("JetComparisonHistsAlgo::execute()", m_plots->execute( jets1, jets2, eventWeight ), "");
+  } else {
+    // we are comparing clusters, so we just need to skip the dR matching and go straight to passing in the matched jets
+    static SG::AuxElement::Decorator<ElementLink<xAOD::CaloClusterContainer> > parentClusterLink("ParentClusterLink");
+    for(const auto jet1: *jets1){
+      xAOD::Jet* jet2(new xAOD::Jet);
+      const xAOD::CaloCluster* cluster = *(parentClusterLink(*jet1));
+      xAOD::JetFourMom_t newp4(cluster->pt(), cluster->eta(), cluster->phi(), cluster->m());
+      jet2->setJetP4(newp4);
+      RETURN_CHECK("JetComparisonHistsAlgo::execute()", m_plots->execute( jet1, jet2, eventWeight ), "");
+      delete jet2;
+    }
+  }
 
   return EL::StatusCode::SUCCESS;
 }
