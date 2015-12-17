@@ -127,6 +127,7 @@ EL::StatusCode JetComparisonHistsAlgo :: execute ()
     static SG::AuxElement::Decorator<ElementLink<xAOD::CaloClusterContainer> > parentClusterLink("ParentClusterLink");
     for(const auto jet1: *jets1){
       xAOD::Jet* jet2(new xAOD::Jet);
+      jet2->makePrivateStore();
       const xAOD::CaloCluster* cluster = *(parentClusterLink(*jet1));
       xAOD::JetFourMom_t newp4(cluster->pt(), cluster->eta(), cluster->phi(), cluster->m());
       jet2->setJetP4(newp4);
