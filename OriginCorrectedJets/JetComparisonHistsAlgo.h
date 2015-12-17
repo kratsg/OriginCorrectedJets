@@ -15,7 +15,7 @@ public:
   std::string m_inContainer1Name;
   std::string m_inContainer2Name;
   std::string m_detailStr;
-  float m_DR;
+  float m_dR;
 
 private:
   JetComparisonHists* m_plots; //!

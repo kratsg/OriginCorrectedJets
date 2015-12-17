@@ -88,9 +88,9 @@ StatusCode JetComparisonHists::initialize() {
 
 StatusCode JetComparisonHists::execute( const xAOD::JetContainer* jets1, const xAOD::JetContainer* jets2, float eventWeight ) {
   // apply dR matching here
-  for(const auto& jet1: *jets1)
-    for(const auto& jet2: *jets2)
-      if(xAOD::P4Helpers::isInDeltaR(jet1, jet2, m_dR))
+  for(const auto jet1: *jets1)
+    for(const auto jet2: *jets2)
+      if(xAOD::P4Helpers::isInDeltaR(*jet1, *jet2, m_dR))
         if(!this->execute( jet1, jet2, eventWeight ).isSuccess())
           return StatusCode::FAILURE;
 
@@ -98,7 +98,7 @@ StatusCode JetComparisonHists::execute( const xAOD::JetContainer* jets1, const x
     int numJets = std::min( m_infoSwitch->m_numLeadingJets, (int)jets1->size() );
     for(int iJet=0; iJet < numJets; ++iJet){
       auto jet1 = jets1->at(iJet);
-      for(const auto& jet2: *jets2){
+      for(const auto jet2: *jets2){
         if(xAOD::P4Helpers::isInDeltaR(*jet1, *jet2, m_dR)){
           m_NjetsPt.at(iJet)->        Fill( std::fabs(jet1->pt()-jet2->pt())/1e3,   eventWeight);
           m_NjetsEta.at(iJet)->       Fill( xAOD::P4Helpers::deltaEta(jet1, jet2),      eventWeight);

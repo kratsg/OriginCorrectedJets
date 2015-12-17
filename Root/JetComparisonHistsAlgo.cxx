@@ -25,7 +25,7 @@ JetComparisonHistsAlgo :: JetComparisonHistsAlgo (std::string className) :
   m_inContainer2Name         = "";
   // which plots will be turned on
   m_detailStr               = "";
-  m_DR                      = 0.3;
+  m_dR                      = 0.3;
 
   m_debug                   = false;
 
@@ -57,7 +57,7 @@ EL::StatusCode JetComparisonHistsAlgo :: configure ()
     m_inContainer2Name        = config->GetValue("InputContainer2",  m_inContainer2Name.c_str());
     // which plots will be turned on
     m_detailStr               = config->GetValue("DetailStr",       m_detailStr.c_str());
-    m_DR                      = config->GetValue("DeltaR", m_DR);
+    m_dR                      = config->GetValue("DeltaR", m_dR);
 
     m_debug                   = config->GetValue("Debug" ,           m_debug);
 
@@ -95,7 +95,7 @@ EL::StatusCode JetComparisonHistsAlgo :: initialize ()
 
   // only running 1 collection
   m_plots = new JetComparisonHists( m_name, m_detailStr ); // add systematic
-  m_plots->m_DR = m_DR;
+  m_plots->m_dR = m_dR;
   RETURN_CHECK("JetComparisonHistsAlgo::initialize()", m_plots->initialize(), "");
   m_plots->record( wk() );
   m_event = wk()->xaodEvent();

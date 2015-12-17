@@ -132,7 +132,7 @@ EL::StatusCode OriginCorrection :: execute ()
   RETURN_CHECK("OriginCorrection::execute()", m_store->record(outJetsAux, m_outContainerName+"Aux."), "Could not record output aux container to TStore.");
 
   static SG::AuxElement::Decorator<ElementLink<xAOD::CaloClusterContainer> > parentClusterLink("ParentClusterLink");
-  for(const auto& cluster: *inClusters){
+  for(const auto cluster: *inClusters){
     // first, retrieve center mag: Cluster Centroid (\f$\sqrt(x^2+y^2+z^2)\f$)
     //      if it is somehow missing, we will just error out because it should not be missing
     double center_mag(-999.0);
