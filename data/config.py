@@ -38,7 +38,7 @@ for container in [truthJets, normalJets, pflowJets, originCorrectedJets, uncorre
                             "m_name": container
                           })
 
-for left,right,compareClusters in [(uncorrectedClusters, originCorrectedClusters, True),
+for left,right,compareClusters in [(originCorrectedClusters, "", True),
                    (normalJets, originCorrectedJets, False),
                    (normalJets, truthJets, False),
                    (normalJets, pflowJets, False),
