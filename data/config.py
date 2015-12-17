@@ -35,7 +35,7 @@ for container in [truthJets, normalJets, pflowJets, originCorrectedJets, uncorre
   c.setalg("JetHistsAlgo", {"m_debug": False,
                             "m_inContainerName": container,
                             "m_detailStr": "kinematic substructure 4LeadingJets",
-                            "m_name": container
+                            "m_name": "kinematics/{0:s}".format(container)
                           })
 
 for left,right,compareClusters in [(originCorrectedClusters, "", True),
@@ -49,6 +49,6 @@ for left,right,compareClusters in [(originCorrectedClusters, "", True),
                                       "m_inContainer1Name": left,
                                       "m_inContainer2Name": right,
                                       "m_detailStr": "kinematic substructure 4LeadingJets",
-                                      "m_name": "{0:s}versus{1:s}".format(left, right),
+                                      "m_name": "comparisons/{0:s}v{1:s}".format(left, right),
                                       "m_compareClusters": compareClusters
                                      })
