@@ -4,7 +4,7 @@
 #include <OriginCorrectedJets/JetComparisonHists.h>
 
 // algorithm wrapper
-#include "OriginCorrectedJets/Algorithm.h"
+#include "xAODAnaHelpers/Algorithm.h"
 
 class JetComparisonHistsAlgo : public xAH::Algorithm
 {
@@ -15,6 +15,7 @@ public:
   std::string m_inContainer1Name;
   std::string m_inContainer2Name;
   std::string m_detailStr;
+  float m_DR;
 
 private:
   JetComparisonHists* m_plots; //!

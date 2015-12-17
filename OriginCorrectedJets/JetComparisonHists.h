@@ -15,10 +15,12 @@ class JetComparisonHists : public HistogramManager
 
     bool m_debug;
     StatusCode initialize();
-    StatusCode execute( const xAOD::JetContainer* jets_1, const xAOD::JetContainer* jets_2, float eventWeight);
-    StatusCode execute( const xAOD::Jet* jet_1, const xAOD::JetContainer* jet_2, float eventWeight);
+    StatusCode execute( const xAOD::JetContainer* jets1, const xAOD::JetContainer* jets2, float eventWeight);
+    StatusCode execute( const xAOD::Jet* jet1, const xAOD::JetContainer* jet2, float eventWeight);
     using HistogramManager::book; // make other overloaded version of book() to show up in subclass
     using HistogramManager::execute; // overload
+
+    float m_dR = 0.3;
 
   protected:
 

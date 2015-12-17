@@ -95,11 +95,11 @@ StatusCode JetComparisonHists::execute( const xAOD::JetContainer* jets1, const x
           return StatusCode::FAILURE;
 
   if( m_infoSwitch->m_numLeadingJets > 0){
-    int numJets = std::min( m_infoSwitch->m_numLeadingJets, (int)jets->size() );
+    int numJets = std::min( m_infoSwitch->m_numLeadingJets, (int)jets1->size() );
     for(int iJet=0; iJet < numJets; ++iJet){
-      auto jet1 = jets->at(iJet);
+      auto jet1 = jets1->at(iJet);
       for(const auto& jet2: *jets2){
-        if(xAOD::P4Helpers::isInDeltaR(jet1, jet2, m_dR)){
+        if(xAOD::P4Helpers::isInDeltaR(*jet1, *jet2, m_dR)){
           m_NjetsPt.at(iJet)->        Fill( std::fabs(jet1->pt()-jet2->pt())/1e3,   eventWeight);
           m_NjetsEta.at(iJet)->       Fill( xAOD::P4Helpers::deltaEta(jet1, jet2),      eventWeight);
           m_NjetsPhi.at(iJet)->       Fill( xAOD::P4Helpers::deltaPhi(jet1, jet2),      eventWeight);
