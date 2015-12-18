@@ -11,6 +11,7 @@ public:
   std::string m_inContainerName;
   std::string m_outContainerName;
   bool m_doCorrection;
+  bool m_plotCorrectionVariables;
   std::string m_vertexContainerName;
 
   // this is a standard constructor

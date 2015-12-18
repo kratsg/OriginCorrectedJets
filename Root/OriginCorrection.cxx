@@ -34,6 +34,7 @@ OriginCorrection :: OriginCorrection (std::string className) :
   m_inContainerName         = "";
   m_outContainerName        = "";
   m_doCorrection            = true;
+  m_plotCorrectionVariables = true;
   m_vertexContainerName     = "PrimaryVertices";
 }
 
@@ -50,6 +51,8 @@ EL::StatusCode  OriginCorrection :: configure ()
     // input container to be read from TEvent or TStore
     m_inContainerName         = config->GetValue("InputContainer",  m_inContainerName.c_str());
     m_outContainerName        = config->GetValue("OutputContainer",  m_outContainerName.c_str());
+    m_doCorrection            = config->GetValue("DoCorrection", m_doCorrection);
+    m_plotCorrectionVariables = config->GetValue("PlotCorrectionVariables", m_plotCorrectionVariables);
     m_vertexContainerName     = config->GetValue("PrimaryVertices", m_vertexContainerName.c_str());
 
     config->Print();
