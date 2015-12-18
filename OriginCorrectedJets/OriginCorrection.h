@@ -1,6 +1,8 @@
 #ifndef OriginCorrectedJets_OriginCorrection_H
 #define OriginCorrectedJets_OriginCorrection_H
 
+#include <TH1F.h>
+
 // algorithm wrapper
 #include "xAODAnaHelpers/Algorithm.h"
 
@@ -13,6 +15,13 @@ public:
   bool m_doCorrection;
   bool m_plotCorrectionVariables;
   std::string m_vertexContainerName;
+
+private:
+
+  TH1F* m_primaryVertex_z; //!
+  TH1F* m_cluster_centerMag; //!
+
+public:
 
   // this is a standard constructor
   OriginCorrection (std::string className = "OriginCorrection");

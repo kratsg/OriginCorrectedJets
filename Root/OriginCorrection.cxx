@@ -9,6 +9,7 @@
 #include <xAODAnaHelpers/tools/ReturnCheck.h>
 
 // EDM includes
+#include <xAODEventInfo/EventInfo.h>
 #include "xAODJet/JetContainer.h"
 #include "xAODJet/JetAuxContainer.h"
 #include "xAODCaloEvent/CaloClusterContainer.h"
@@ -90,6 +91,18 @@ EL::StatusCode OriginCorrection :: setupJob (EL::Job& job)
 EL::StatusCode OriginCorrection :: histInitialize ()
 {
   RETURN_CHECK("xAH::Algorithm::algInitialize()", xAH::Algorithm::algInitialize(), "");
+
+  if(m_plotCorrectionVariables){
+    m_primaryVertex_z = new TH1F( "originCorrection/vxp_z", "vxp_z", 1000, -500, 500 );
+    m_primaryVertex_z->GetXaxis()->SetTitle("primary vertex z_{0}");
+    m_primaryVertex_z->Sumw2(true);
+    wk()->addOutput(m_primaryVertex_z);
+
+    m_cluster_centerMag = new TH1F( "originCorrection/cluster_centerMag", "cluster_centerMag", 1000, 0, 5000 );
+    m_cluster_centerMag->GetXaxis()->SetTitle("cluster CENTER_MAG");
+    m_cluster_centerMag->Sumw2(true);
+    wk()->addOutput(m_cluster_centerMag);
+  }
   return EL::StatusCode::SUCCESS;
 }
 
@@ -119,6 +132,14 @@ EL::StatusCode OriginCorrection :: execute ()
 {
   if ( m_debug ) { Info("execute()", "Applying Jet Origin Correction... "); }
 
+  const xAOD::EventInfo* eventInfo(nullptr);
+  RETURN_CHECK("JetComparisonHistsAlgo::execute()", HelperFunctions::retrieve(eventInfo, m_eventInfoContainerName, m_event, m_store, m_verbose) ,"");
+
+  float eventWeight(1);
+  if( eventInfo->isAvailable< float >( "mcEventWeight" ) ) {
+    eventWeight = eventInfo->auxdecor< float >( "mcEventWeight" );
+  }
+
   // get the calorimeter clusters
   const xAOD::CaloClusterContainer* inClusters(nullptr);
   RETURN_CHECK("OriginCorrection::execute()", HelperFunctions::retrieve(inClusters, m_inContainerName, m_event, m_store, m_verbose) ,"");
@@ -127,6 +148,8 @@ EL::StatusCode OriginCorrection :: execute ()
   const xAOD::VertexContainer* vertices(nullptr);
   RETURN_CHECK("OriginCorrection::execute()", HelperFunctions::retrieve(vertices, m_vertexContainerName, m_event, m_store, m_verbose), "");
   const xAOD::Vertex* primaryVertex = vertices->at(HelperFunctions::getPrimaryVertexLocation(vertices));
+
+  if(m_plotCorrectionVariables) m_primaryVertex_z->Fill( primaryVertex->z(), eventWeight );
 
   xAOD::JetContainer* outJets(new xAOD::JetContainer);
   xAOD::JetAuxContainer* outJetsAux(new xAOD::JetAuxContainer);
@@ -141,6 +164,9 @@ EL::StatusCode OriginCorrection :: execute ()
     //      if it is somehow missing, we will just error out because it should not be missing
     double center_mag(-999.0);
     if(!cluster->retrieveMoment(xAOD::CaloCluster::MomentType::CENTER_MAG, center_mag)) return EL::StatusCode::FAILURE;
+
+    if(m_plotCorrectionVariables) m_cluster_centerMag->Fill( center_mag, eventWeight );
+
     // create and output jets
     xAOD::Jet* outJet(new xAOD::Jet);
     outJets->push_back(outJet);
