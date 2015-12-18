@@ -91,18 +91,6 @@ EL::StatusCode OriginCorrection :: setupJob (EL::Job& job)
 EL::StatusCode OriginCorrection :: histInitialize ()
 {
   RETURN_CHECK("xAH::Algorithm::algInitialize()", xAH::Algorithm::algInitialize(), "");
-
-  if(m_plotCorrectionVariables){
-    m_primaryVertex_z = new TH1F( "originCorrection/vxp_z", "vxp_z", 1000, -500, 500 );
-    m_primaryVertex_z->GetXaxis()->SetTitle("primary vertex z_{0}");
-    m_primaryVertex_z->Sumw2(true);
-    wk()->addOutput(m_primaryVertex_z);
-
-    m_cluster_centerMag = new TH1F( "originCorrection/cluster_centerMag", "cluster_centerMag", 1000, 0, 5000 );
-    m_cluster_centerMag->GetXaxis()->SetTitle("cluster CENTER_MAG");
-    m_cluster_centerMag->Sumw2(true);
-    wk()->addOutput(m_cluster_centerMag);
-  }
   return EL::StatusCode::SUCCESS;
 }
 
@@ -122,6 +110,18 @@ EL::StatusCode OriginCorrection :: initialize ()
   if ( this->configure() == EL::StatusCode::FAILURE ) {
     Error("initialize()", "Failed to properly configure. Exiting." );
     return EL::StatusCode::FAILURE;
+  }
+
+  if(m_plotCorrectionVariables){
+    m_primaryVertex_z = new TH1F( "originCorrection/vxp_z", "vxp_z", 1000, -500, 500 );
+    m_primaryVertex_z->GetXaxis()->SetTitle("primary vertex z_{0}");
+    m_primaryVertex_z->Sumw2(true);
+    wk()->addOutput(m_primaryVertex_z);
+
+    m_cluster_centerMag = new TH1F( "originCorrection/cluster_centerMag", "cluster_centerMag", 1000, 0, 10000 );
+    m_cluster_centerMag->GetXaxis()->SetTitle("cluster CENTER_MAG");
+    m_cluster_centerMag->Sumw2(true);
+    wk()->addOutput(m_cluster_centerMag);
   }
 
   return EL::StatusCode::SUCCESS;

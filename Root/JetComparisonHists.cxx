@@ -20,11 +20,11 @@ JetComparisonHists :: ~JetComparisonHists () {
 StatusCode JetComparisonHists::initialize() {
 
   // These plots are always made
-  m_jetPt          = book(m_name, "jetdPt",  "jet #Delta p_{T} [GeV]", 300, -150, 150.);
-  m_jetEta         = book(m_name, "jetdEta", "jet #Delta#eta",         200, -1.0, 1.0);
-  m_jetPhi         = book(m_name, "jetdPhi", "jet #Delta#phi",200, -1.0, 1.0 );
-  m_jetM           = book(m_name, "jetdMass", "jet #Delta Mass [GeV]", 200, -1000, 1000);
-  m_jetDR          = book(m_name, "jetDR", "jet #Delta R", 100, 0.0, 1.0);
+  m_jetPt          = book(m_name, "jetdPt",  "jet #Delta p_{T} [GeV]", 600, -150,  150.);
+  m_jetEta         = book(m_name, "jetdEta", "jet #Delta#eta",         400, -1.0,   1.0);
+  m_jetPhi         = book(m_name, "jetdPhi", "jet #Delta#phi",         400, -1.0,   1.0);
+  m_jetM           = book(m_name, "jetdMass", "jet #Delta Mass [GeV]", 400, -1000, 1000);
+  m_jetDR          = book(m_name, "jetDR", "jet #Delta R",             200,   0.0,  1.0);
 
   if(m_debug) Info("JetComparisonHists::initialize()", m_name.c_str());
   // details of the jet kinematics

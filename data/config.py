@@ -58,7 +58,14 @@ for inContainer,outContainer in zip(jets,selectedJets):
                            "m_cleanJets": False,
                            "m_pT_min": 450.e3})
 
-for container in jets+selectedJets+[uncorrectedClusters, originCorrectedClusters]:
+for container in [uncorrectedClusters, originCorrectedClusters]:
+  c.setalg("JetHistsAlgo", {"m_debug": False,
+                            "m_inContainerName": container,
+                            "m_detailStr": "kinematic",
+                            "m_name": "kinematics/{0:s}".format(container)
+                          })
+
+for container in jets+selectedJets:
   c.setalg("JetHistsAlgo", {"m_debug": False,
                             "m_inContainerName": container,
                             "m_detailStr": "kinematic substructure 2LeadingJets",
