@@ -58,6 +58,7 @@ class JetComparisonHists : public HistogramManager
     TH1F* m_tau3_wta; //!
     TH1F* m_tau21_wta; //!
     TH1F* m_tau32_wta; //!
+    TH1F* m_numConstituents; //!
 };
 
 #endif

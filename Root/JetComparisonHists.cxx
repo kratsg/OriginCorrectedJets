@@ -78,6 +78,7 @@ StatusCode JetComparisonHists::initialize() {
     m_tau3_wta                  = book(m_name, "dTau3_wta", "#Delta#Tau_{3}^{wta}", 200, -1.0, 1.0);
     m_tau21_wta                 = book(m_name, "dTau21_wta", "#Delta#Tau_{21}^{wta}", 200, -1.0, 1.0);
     m_tau32_wta                 = book(m_name, "dTau32_wta", "#Delta#Tau_{32}^{wta}", 200, -1.0, 1.0);
+    m_numConstituents           = book(m_name, "numConstituents", "num. constituents", 501, -0.5, 500.5);
   }
 
   return StatusCode::SUCCESS;
@@ -147,6 +148,8 @@ StatusCode JetComparisonHists::execute( const xAOD::Jet* jet1, const xAOD::Jet* 
     if(Tau3_wta.isAvailable(*jet1) && Tau3_wta.isAvailable(*jet2)) m_tau3_wta->Fill( (Tau3_wta(*jet1) - Tau3_wta(*jet2)), eventWeight );
     if(Tau1_wta.isAvailable(*jet1) && Tau2_wta.isAvailable(*jet1) && Tau1_wta.isAvailable(*jet2) && Tau2_wta.isAvailable(*jet2)) m_tau21_wta->Fill( (Tau2_wta(*jet1)/Tau1_wta(*jet1) - Tau2_wta(*jet2)/Tau1_wta(*jet2)), eventWeight );
     if(Tau2_wta.isAvailable(*jet1) && Tau3_wta.isAvailable(*jet1) && Tau2_wta.isAvailable(*jet2) && Tau3_wta.isAvailable(*jet2)) m_tau32_wta->Fill( (Tau3_wta(*jet1)/Tau2_wta(*jet1) - Tau3_wta(*jet2)/Tau2_wta(*jet2)), eventWeight );
+
+    m_numConstituents->Fill( jet1->numConstituents() - jet2->numConstituents(), eventWeight );
 
   }
 
