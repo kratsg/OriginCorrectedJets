@@ -78,7 +78,7 @@ StatusCode JetComparisonHists::initialize() {
     m_tau3_wta                  = book(m_name, "dTau3_wta", "#Delta#Tau_{3}^{wta}", 200, -1.0, 1.0);
     m_tau21_wta                 = book(m_name, "dTau21_wta", "#Delta#Tau_{21}^{wta}", 200, -1.0, 1.0);
     m_tau32_wta                 = book(m_name, "dTau32_wta", "#Delta#Tau_{32}^{wta}", 200, -1.0, 1.0);
-    m_numConstituents           = book(m_name, "numConstituents", "num. constituents", 1002, -500.5, 500.5);
+    m_numConstituents           = book(m_name, "numConstituents", "num. constituents", 1001, -500.5, 500.5);
   }
 
   return StatusCode::SUCCESS;
