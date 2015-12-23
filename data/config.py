@@ -56,7 +56,8 @@ for inContainer,outContainer in zip(jets,selectedJets):
                            "m_decorateSelectedObjects": False,
                            "m_createSelectedContainer": True,
                            "m_cleanJets": False,
-                           "m_pT_min": 450.e3})
+                           "m_pT_min": 450.e3,
+                           "m_mass_min": 70.e3})
 
 for container in [uncorrectedClusters, originCorrectedClusters]:
   c.setalg("JetHistsAlgo", {"m_debug": False,
