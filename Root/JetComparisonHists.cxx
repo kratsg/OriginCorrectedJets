@@ -36,10 +36,10 @@ StatusCode JetComparisonHists::initialize() {
   }
 
   // N leading jets
-  if( m_infoSwitch->m_numLeadingJets > 0 ){
+  if( m_infoSwitch->m_numLeading > 0 ){
     std::stringstream jetNum;
     std::stringstream jetTitle;
-    for(int iJet=0; iJet < m_infoSwitch->m_numLeadingJets; ++iJet){
+    for(int iJet=0; iJet < m_infoSwitch->m_numLeading; ++iJet){
       jetNum << iJet; jetTitle << iJet+1;
       switch(iJet) {
         case 0:
@@ -92,8 +92,8 @@ StatusCode JetComparisonHists::execute( const xAOD::JetContainer* jets1, const x
         if(!this->execute( jet1, jet2, eventWeight ).isSuccess())
           return StatusCode::FAILURE;
 
-  if( m_infoSwitch->m_numLeadingJets > 0){
-    int numJets = std::min( m_infoSwitch->m_numLeadingJets, (int)jets1->size() );
+  if( m_infoSwitch->m_numLeading > 0){
+    int numJets = std::min( m_infoSwitch->m_numLeading, (int)jets1->size() );
     for(int iJet=0; iJet < numJets; ++iJet){
       auto jet1 = jets1->at(iJet);
       for(const auto jet2: *jets2){
