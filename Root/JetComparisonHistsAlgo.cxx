@@ -49,36 +49,6 @@ EL::StatusCode JetComparisonHistsAlgo :: histInitialize ()
   return EL::StatusCode::SUCCESS;
 }
 
-EL::StatusCode JetComparisonHistsAlgo :: configure ()
-{
-  if(!getConfig().empty()){
-    // the file exists, use TEnv to read it off
-    TEnv* config = new TEnv(getConfig(true).c_str());
-    // input container to be read from TEvent or TStore
-    m_inContainer1Name        = config->GetValue("InputContainer1",  m_inContainer1Name.c_str());
-    m_inContainer2Name        = config->GetValue("InputContainer2",  m_inContainer2Name.c_str());
-    // which plots will be turned on
-    m_detailStr               = config->GetValue("DetailStr",       m_detailStr.c_str());
-    m_dR                      = config->GetValue("DeltaR", m_dR);
-
-    m_debug                   = config->GetValue("Debug" ,           m_debug);
-
-    Info("configure()", "Loaded in configuration values");
-
-    // everything seems preliminarily ok, let's print config and say we were successful
-    config->Print();
-    delete config;
-  }
-
-  // in case anything was missing or blank...
-  if( m_inContainer1Name.empty() || (m_inContainer2Name.empty() && !m_compareClusters) || m_detailStr.empty() ){
-    Error("configure()", "One or more required configuration values are empty");
-    return EL::StatusCode::FAILURE;
-  }
-
-  return EL::StatusCode::SUCCESS;
-}
-
 EL::StatusCode JetComparisonHistsAlgo :: fileExecute () { return EL::StatusCode::SUCCESS; }
 EL::StatusCode JetComparisonHistsAlgo :: changeInput (bool /*firstFile*/) { return EL::StatusCode::SUCCESS; }
 
@@ -86,14 +56,13 @@ EL::StatusCode JetComparisonHistsAlgo :: initialize ()
 {
   Info("initialize()", m_name.c_str());
 
-  // needed here and not in initalize since this is called first
-  Info("histInitialize()", "Attempting to configure using: %s", m_configName.c_str());
-  if ( this->configure() == EL::StatusCode::FAILURE ) {
-    Error("histInitialize()", "%s failed to properly configure. Exiting.", m_name.c_str() );
+  // in case anything was missing or blank...
+  if( m_inContainer1Name.empty() || (m_inContainer2Name.empty() && !m_compareClusters) || m_detailStr.empty() ){
+    Error("configure()", "One or more required configuration values are empty");
     return EL::StatusCode::FAILURE;
-  } else {
-    Info("histInitialize()", "Succesfully configured! ");
   }
+
+  Info("histInitialize()", "Succesfully configured! ");
 
   // only running 1 collection
   m_plots = new JetComparisonHists( m_name, m_detailStr ); // add systematic
