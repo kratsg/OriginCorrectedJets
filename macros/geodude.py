@@ -3,17 +3,20 @@ import utils
 from rootpy.io import root_open
 
 '''
-Turn off warnings from rootpy.tree for buffer:
-    WARNING:rootpy.tree] Skipping entry in buffer with the same name as an existing branch '<>'
+Warning: it is assumed that the ROOT files being used as inputs have been hadd'ed before passing through this script...
 '''
-from rootpy import log as rootpy_log
-rootpy_log["/rootpy.tree"].setLevel(rootpy_log.ERROR)
 
 import argparse
 import subprocess
 import os
 import json
 import operator
+
+def ensure_dir(f):
+    d = os.path.dirname(f)
+    if not os.path.exists(d):
+        os.makedirs(d)
+    return f
 
 class CustomFormatter(argparse.ArgumentDefaultsHelpFormatter):
   pass
@@ -25,7 +28,7 @@ parser = argparse.ArgumentParser(description='Author: G. Stark. v.{0}'.format(__
 parser.add_argument('files', type=str, nargs='+', help='ROOT files containing the histograms')
 parser.add_argument('--weights', type=str, dest='weights', required=True, help='The weights.json file containing sample weights to apply.')
 parser.add_argument('--lumi', required=False, type=int, dest='lumi', metavar='<L>', help='luminosity to use in units of ifb', default=1)
-parser.add_argument('--output', required=False, type=str, dest='output', metavar='output.root', help='Output ROOT filename to use', default='golem.root')
+parser.add_argument('--output', required=False, type=str, dest='output', metavar='output.root', help='Output directory to put the histograms', default='golem')
 
 # parse the arguments, throw errors if missing any
 args = parser.parse_args()
@@ -52,18 +55,8 @@ for fname in args.files:
         print('Could not extract the DSID from {0:s}. Skipping.'.format(fname))
         continue
 
-    # open for updating to add a branch
-    f = root_open(args.output, "CREATE")
-
-    try:
-        # get the scale factor for the given file name then
-        # use reduce and multiply everything to the default (args.lumi)
-        weight = weights[dsid]
-        scale_factor = args.lumi
-        scale_factor *= weight.get('cross section')
-        scale_factor *= weight.get('filter efficiency')
-        scale_factor *= weight.get('k-factor')
-        scale_factor /= weight.get('num events')
-    except KeyError:
-        print('The weights file does not have an entry for DSID#{0:s}'.format(dsid))
-        continue
+    # open to read out the histograms and write it back
+    f = root_open(fname, "READ")
+    # open to write out the result
+    out_f = root_open(ensure_dir(os.path.join(args.output, fname)), "NEW")
+    for collection in f.kinematics:
