@@ -39,43 +39,6 @@ OriginCorrection :: OriginCorrection (std::string className) :
   m_vertexContainerName     = "PrimaryVertices";
 }
 
-EL::StatusCode  OriginCorrection :: configure ()
-{
-  if ( !getConfig().empty() ) {
-
-    Info("configure()", "Configuring OriginCorrection Interface. User configuration read from : %s ", getConfig().c_str());
-
-    TEnv* config = new TEnv(getConfig(true).c_str());
-
-    // read debug flag from .config file
-    m_debug                   = config->GetValue("Debug" , m_debug);
-    // input container to be read from TEvent or TStore
-    m_inContainerName         = config->GetValue("InputContainer",  m_inContainerName.c_str());
-    m_outContainerName        = config->GetValue("OutputContainer",  m_outContainerName.c_str());
-    m_doCorrection            = config->GetValue("DoCorrection", m_doCorrection);
-    m_plotCorrectionVariables = config->GetValue("PlotCorrectionVariables", m_plotCorrectionVariables);
-    m_vertexContainerName     = config->GetValue("PrimaryVertices", m_vertexContainerName.c_str());
-
-    config->Print();
-
-    delete config; config = nullptr;
-  }
-
-  // If there is no InputContainer we must stop
-  if ( m_inContainerName.empty() ) {
-    Error("configure()", "InputContainer is empty!");
-    return EL::StatusCode::FAILURE;
-  }
-
-  if(m_outContainerName.empty()) m_outContainerName = "OriginCorrected"+m_inContainerName;
-
-  if ( !getConfig().empty() )
-    Info("configure()", "OriginCorrection Interface succesfully configured! ");
-
-  return EL::StatusCode::SUCCESS;
-}
-
-
 EL::StatusCode OriginCorrection :: setupJob (EL::Job& job)
 {
   Info("setupJob()", "Calling setupJob");
@@ -107,10 +70,15 @@ EL::StatusCode OriginCorrection :: initialize ()
   m_event = wk()->xaodEvent();
   m_store = wk()->xaodStore();
 
-  if ( this->configure() == EL::StatusCode::FAILURE ) {
-    Error("initialize()", "Failed to properly configure. Exiting." );
+  // If there is no InputContainer we must stop
+  if ( m_inContainerName.empty() ) {
+    Error("initialize()", "InputContainer is empty!");
     return EL::StatusCode::FAILURE;
   }
+
+  if(m_outContainerName.empty()) m_outContainerName = "OriginCorrected"+m_inContainerName;
+
+  Info("initialize()", "OriginCorrection Interface succesfully configured! ");
 
   if(m_plotCorrectionVariables){
     m_primaryVertex_z = new TH1F( "originCorrection/vxp_z", "vxp_z", 1000, -500, 500 );
